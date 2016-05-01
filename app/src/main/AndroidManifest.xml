@@ -1,0 +1,35 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.kentli.cycletrack">
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <supports-screens android:normalScreens="true" android:anyDensity="true"/>
+
+
+    <application android:label="@string/app_name"  android:icon="@drawable/icon72" android:theme="@style/AppTheme">
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyB_zB3WjMf3fnrQuHXYbZwPCVUxg7pz0yI" />
+        <uses-library
+            android:name="com.google.android.maps" />
+
+        <activity android:label="@string/app_name" android:name=".MainInput" android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity  android:label="@string/recording_title" android:name="RecordingActivity" android:finishOnTaskLaunch="true" android:launchMode="singleInstance"/>
+
+        <activity android:name="SaveTrip" android:finishOnTaskLaunch="true" android:launchMode="singleInstance"/>
+
+        <activity android:name="ShowMap" android:finishOnTaskLaunch="true" android:launchMode="singleTop"/>
+        <activity android:name="UserInfoActivity" android:finishOnTaskLaunch="true" android:launchMode="singleInstance"/>
+        <service android:name="RecordingService" android:enabled="true" android:exported="true"/>
+    </application>
+
+
+
+
+</manifest>

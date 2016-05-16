@@ -249,7 +249,7 @@ public class TripUploader extends AsyncTask <Long, Integer, Boolean> {
         Log.v("PostData", nameValuePairs.toString());
 
         HttpClient client = new DefaultHttpClient();
-        final String postUrl = "http://bikedatabase.sfcta.org/post/";
+        final String postUrl = "http://fathomless-brook-26316.herokuapp.com/post/";
         HttpPost postRequest = new HttpPost(postUrl);
 
         try {

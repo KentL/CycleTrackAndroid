@@ -275,10 +275,4 @@ public class MainInput extends AppCompatActivity {
     }
 }
 
-class FakeAdapter extends SimpleAdapter {
-	public FakeAdapter(Context context, List<? extends Map<String, ?>> data,
-			int resource, String[] from, int[] to) {
-		super(context, data, resource, from, to);
-	}
 
-}

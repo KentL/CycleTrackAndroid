@@ -30,12 +30,15 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -67,6 +70,7 @@ public class RecordingService extends Service implements LocationListener {
 	Location lastLocation;
 	float distanceTraveled;
 	float curSpeed, maxSpeed;
+	double curLat, curLng;
 	TripData trip;
 
 	public final static int STATE_IDLE = 0;
@@ -86,7 +90,25 @@ public class RecordingService extends Service implements LocationListener {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-	    soundpool = new SoundPool(1,AudioManager.STREAM_NOTIFICATION,0);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            AudioAttributes attributes = new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_GAME)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build();
+
+            soundpool = new SoundPool.Builder()
+                    .setAudioAttributes(attributes)
+                    .build();
+        }
+        else {
+            soundpool = new SoundPool(10, AudioManager.STREAM_MUSIC, 0);
+        }
+        soundpool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
+            @Override
+            public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
+                soundPool.play(sampleId, 1.0f, 1.0f, 0, 0, 1.0f);
+            }
+        });
 	    bikebell = soundpool.load(this.getBaseContext(), R.raw.bikebell,1);
 	}
 
@@ -240,25 +262,19 @@ public class RecordingService extends Service implements LocationListener {
 	public void remindUser() {
 	    soundpool.play(bikebell, 1.0f, 1.0f, 1, 0, 1.0f);
 
-		int icon = R.drawable.icon25;
         long when = System.currentTimeMillis();
         int minutes = (int) (when - trip.startTime) / 60000;
 		CharSequence tickerText = String.format("Still recording (%d min)", minutes);
 
-		Notification notification = new Notification(icon, tickerText, when);
-		notification.flags |=
-				Notification.FLAG_ONGOING_EVENT |
-				Notification.FLAG_SHOW_LIGHTS;
-		notification.ledARGB = 0xffff00ff;
-		notification.ledOnMS = 300;
-		notification.ledOffMS = 3000;
-
-
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(RecordingService.this)
 				.setContentTitle("CycleTracks - Recording")
-				.setContentText("Tap to finish your trip");
+				.setContentText("Tap to finish your trip")
+                .setTicker(tickerText)
+                .setWhen(when)
+                .setSmallIcon(R.drawable.icon_notification)
+                .setOngoing(true) ;
 
-		TaskStackBuilder stackBuilder = TaskStackBuilder.create(RecordingService.this);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(RecordingService.this);
 		stackBuilder.addNextIntent(new Intent(RecordingService.this,RecordingActivity.class));
 		PendingIntent resultPendingIntent =
 				stackBuilder.getPendingIntent(
@@ -269,62 +285,31 @@ public class RecordingService extends Service implements LocationListener {
 
 		NotificationManager  manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		manager.notify(11, builder.build());
-
-		 /*
-                //API level 8
-		Context context = this;
-		CharSequence contentTitle = "CycleTracks - Recording";
-		CharSequence contentText = "Tap to finish your trip";
-		Intent notificationIntent = new Intent(context, RecordingActivity.class);
-		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
-		notification.setLatestEventInfo(context, contentTitle, contentText,	contentIntent);
-        final int RECORDING_ID = 1;
-		mNotificationManager.notify(RECORDING_ID, notification);
-		*/
 	}
 
 	private void setNotification() {
-		int icon = R.drawable.icon25;
 		CharSequence tickerText = "Recording...";
 		long when = System.currentTimeMillis();
 
-		Notification notification = new Notification(icon, tickerText, when);
-
-		notification.ledARGB = 0xffff00ff;
-		notification.ledOnMS = 300;
-		notification.ledOffMS = 3000;
-		notification.flags = notification.flags |
-				Notification.FLAG_ONGOING_EVENT |
-				Notification.FLAG_SHOW_LIGHTS |
-				Notification.FLAG_INSISTENT |
-				Notification.FLAG_NO_CLEAR;
-
-
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(RecordingService.this)
 				.setContentTitle("CycleTracks - Recording")
-				.setContentText("Tap to finish your trip");
+                .setContentText("Tap to finish your trip")
+                .setSmallIcon(R.drawable.icon_notification)
+                .setTicker(tickerText)
+                .setWhen(when)
+                .setOngoing(true) ;
 		TaskStackBuilder stackBuilder = TaskStackBuilder.create(RecordingService.this);
 		stackBuilder.addNextIntent(new Intent(RecordingService.this,RecordingActivity.class));
 		PendingIntent resultPendingIntent =
 				stackBuilder.getPendingIntent(
 						0,
-						PendingIntent.FLAG_UPDATE_CURRENT
+						PendingIntent.FLAG_CANCEL_CURRENT
 				);
 		builder.setContentIntent(resultPendingIntent);
 		NotificationManager  manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		manager.notify(11, builder.build());
 
-		/*
-                //API level 8
-		Context context = this;
-		CharSequence contentTitle = "CycleTracks - Recording";
-		CharSequence contentText = "Tap to finish your trip";
-		Intent notificationIntent = new Intent(context, RecordingActivity.class);
-		PendingIntent contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
-		notification.setLatestEventInfo(context, contentTitle, contentText,	contentIntent);
-		final int RECORDING_ID = 1;
-		mNotificationManager.notify(RECORDING_ID, notification);
-		*/
+
 	}
 
 	private void clearNotifications() {
@@ -345,6 +330,7 @@ public class RecordingService extends Service implements LocationListener {
     	if (newLocation.getAccuracy()< 20) {
             // Speed data is sometimes awful, too:
             curSpeed = newLocation.getSpeed() * spdConvert;
+
             if (curSpeed < 60.0f) {
             	maxSpeed = Math.max(maxSpeed, curSpeed);
             }

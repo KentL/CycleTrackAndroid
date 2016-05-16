@@ -46,8 +46,10 @@ import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.maps.GeoPoint;
@@ -115,6 +117,8 @@ public class ShowMap extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(ArrayList<GeoPoint> gpspoints) {
+            if (gpspoints.size()<=0)
+                return;
             ArrayList<LatLng> points = new ArrayList<>();
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
             for (int i = 0; i < gpspoints.size(); i++) {
@@ -127,7 +131,7 @@ public class ShowMap extends AppCompatActivity {
             }
             Polyline route = mapView.addPolyline(new PolylineOptions()
                             .width(5)
-                            .color(Color.RED)
+                            .color(Color.BLUE)
                             .geodesic(true)
             );
             route.setPoints(points);
@@ -137,6 +141,15 @@ public class ShowMap extends AppCompatActivity {
             CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, padding);
             mapView.moveCamera(cu);
             mapView.animateCamera(cu);
+
+            LatLng startPoint=new LatLng(gpspoints.get(0).getLatitudeE6()/1E6,gpspoints.get(0).getLongitudeE6()/1E6);
+            LatLng endPoint=new LatLng(gpspoints.get(gpspoints.size()-1).getLatitudeE6()/1E6,gpspoints.get(gpspoints.size()-1).getLongitudeE6()/1E6);
+            mapView.addMarker(new MarkerOptions()
+                    .position(startPoint))
+                    .setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+            mapView.addMarker(new MarkerOptions()
+                    .position(endPoint))
+                    .setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
         }
     }
 

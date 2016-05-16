@@ -140,7 +140,7 @@ public class SaveTrip extends AppCompatActivity {
 
 				cancelRecording();
 
-				Intent i = new Intent(SaveTrip.this, MainInput.class);
+				Intent i = new Intent(SaveTrip.this, RecordingActivity.class);
 				i.putExtra("keepme", true);
 				startActivity(i);
 				SaveTrip.this.finish();
@@ -200,7 +200,7 @@ public class SaveTrip extends AppCompatActivity {
 				imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 
 				// Now create the MainInput Activity so BACK btn works properly
-				Intent i = new Intent(getApplicationContext(), MainInput.class);
+				Intent i = new Intent(getApplicationContext(), RecordingActivity.class);
 				startActivity(i);
 
 				// And, show the map!

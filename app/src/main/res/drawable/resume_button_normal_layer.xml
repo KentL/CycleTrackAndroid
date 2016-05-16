@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--About how to draw triangle-->
+<!--http://stackoverflow.com/questions/2517589/making-a-triangle-shape-using-xml-definitions-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item>
+        <shape android:shape="oval">
+            <size android:height="80dp" android:width="80dp"/>
+            <gradient
+                android:startColor="#ff297dff"
+                android:endColor="#ff16c0e3"
+                android:type="linear"
+                android:angle="270" />
+        </shape>
+    </item>
+   <item android:drawable="@drawable/triangle_normal" android:left="10dp" android:gravity="center"/>
+</layer-list>

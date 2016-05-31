@@ -12,6 +12,7 @@
 <string name="promptPurpose">Select the main purpose of this trip</string>
 <string name="uploadProgressTitle">Sending...</string>
 <string name="uploadProgressMessage">Sending your trip.\n\nThanks for using CycleTracks!</string>
+    <string name="title_activity_splash_screen">SplashScreen</string>
 
 
 

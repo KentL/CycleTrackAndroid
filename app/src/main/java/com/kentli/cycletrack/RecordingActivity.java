@@ -269,6 +269,7 @@ public class RecordingActivity extends AppCompatActivity implements OnMapReadyCa
                     // Save trip so far (points and extent, but no purpose or notes)
                     fi = new Intent(RecordingActivity.this, SaveTrip.class);
                     trip.updateTrip("", "", "", "");
+                    recordService.cancelRecording();
                 }
                 // Otherwise, cancel and go back to main screen
                 else {

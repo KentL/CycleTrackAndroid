@@ -23,13 +23,9 @@ package com.kentli.cycletrack;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 
-import com.google.android.maps.GeoPoint;
-import com.google.android.maps.OverlayItem;
-import com.kentli.cycletrack.DbAdapter;
-import com.kentli.cycletrack.ItemizedOverlayTrack;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 
@@ -42,8 +38,8 @@ public class TripData {
 	int status;
 	float distance;
 	String purp, fancystart, info;
-	private ArrayList<GeoPoint> gpspoints;
-	GeoPoint startpoint, endpoint;
+	private ArrayList<CyclePoint> gpspoints;
+	CyclePoint startpoint, endpoint;
 	double totalPauseTime = 0;
 	double pauseStartedAt = 0;
 
@@ -131,14 +127,14 @@ public class TripData {
 		mDb.close();
 	}
 
-	public ArrayList<GeoPoint> getPoints() {
+	public ArrayList<CyclePoint> getPoints() {
 		// If already built, don't build again!
 		if (gpspoints != null && gpspoints.size()>0) {
 			return gpspoints;
 		}
 
 		// Otherwise, we need to query DB and build points from scratch.
-		gpspoints = new ArrayList<GeoPoint>();
+		gpspoints = new ArrayList<CyclePoint>();
 
 		try {
 			mDb.openReadOnly();
@@ -163,7 +159,7 @@ public class TripData {
                 double time = points.getDouble(COL_TIME);
                 float acc = (float) points.getDouble(COL_ACC);
 
-				gpspoints.add(new GeoPoint(lat,lgt));
+				gpspoints.add(new CyclePoint(lat,lgt,time,acc));
 				points.moveToNext();
 			}
 			points.close();

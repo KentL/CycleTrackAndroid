@@ -21,27 +21,29 @@
 
 package com.kentli.cycletrack;
 
-import com.google.android.maps.GeoPoint;
 
-class CyclePoint extends GeoPoint {
+import com.google.android.gms.maps.model.LatLng;
+
+class CyclePoint  {
 	public float accuracy;
 	public double altitude;
 	public float speed;
 	public double time;
+	public LatLng geoPoint;
 
     public CyclePoint(int lat, int lgt, double currentTime) {
-        super(lat, lgt);
+        this.geoPoint = new LatLng(lat,lgt);
         this.time = currentTime;
     }
 
     public CyclePoint(int lat, int lgt, double currentTime, float accuracy) {
-        super(lat, lgt);
+		this.geoPoint = new LatLng(lat,lgt);
         this.time = currentTime;
         this.accuracy = accuracy;
     }
 
 	public CyclePoint(int lat, int lgt, double currentTime, float accuracy, double altitude, float speed) {
-		super(lat, lgt);
+		this.geoPoint = new LatLng(lat,lgt);
 		this.time = currentTime;
 		this.accuracy = accuracy;
 		this.altitude = altitude;

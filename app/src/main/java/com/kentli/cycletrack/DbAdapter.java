@@ -158,8 +158,8 @@ public class DbAdapter {
     	// Add the latest point
         ContentValues rowValues = new ContentValues();
         rowValues.put(K_POINT_TRIP, tripid);
-        rowValues.put(K_POINT_LAT, pt.getLatitudeE6());
-        rowValues.put(K_POINT_LGT, pt.getLongitudeE6());
+        rowValues.put(K_POINT_LAT, pt.geoPoint.latitude);
+        rowValues.put(K_POINT_LGT, pt.geoPoint.longitude);
         rowValues.put(K_POINT_TIME, pt.time);
         rowValues.put(K_POINT_ACC, pt.accuracy);
         rowValues.put(K_POINT_ALT, pt.altitude);

@@ -22,45 +22,32 @@
 
 package com.kentli.cycletrack;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Point;
-import android.graphics.Paint.Style;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.Window;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.maps.GeoPoint;
-import com.google.android.maps.MapActivity;
-import com.google.android.maps.MapController;
-import com.google.android.maps.MapView;
-import com.google.android.maps.Overlay;
 
-public class ShowMap extends AppCompatActivity {
+import java.util.ArrayList;
+
+
+public class ShowMap extends AppCompatActivity implements OnMapReadyCallback {
     private GoogleMap mapView;
-    ArrayList<GeoPoint> gpspoints;
+    ArrayList<CyclePoint> gpspoints;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -70,7 +57,7 @@ public class ShowMap extends AppCompatActivity {
 
         try {
             // Set zoom controls
-            mapView = ((MapFragment) getFragmentManager().findFragmentById(R.id.map_ObservationDetailActivity)).getMap();
+             ((MapFragment) getFragmentManager().findFragmentById(R.id.map_ObservationDetailActivity)).getMapAsync(this);
 
             Bundle cmds = getIntent().getExtras();
             long tripid = cmds.getLong("showtrip");
@@ -101,12 +88,17 @@ public class ShowMap extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mapView = googleMap;
+    }
 
-    private class AddPointsToMapLayerTask extends AsyncTask<TripData, Integer, ArrayList<GeoPoint>> {
+
+    private class AddPointsToMapLayerTask extends AsyncTask<TripData, Integer, ArrayList<CyclePoint>> {
         TripData trip;
 
         @Override
-        protected ArrayList<GeoPoint> doInBackground(TripData... trips) {
+        protected ArrayList<CyclePoint> doInBackground(TripData... trips) {
             trip = trips[0]; // always get just the first trip
 
             if (gpspoints == null)
@@ -116,15 +108,15 @@ public class ShowMap extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(ArrayList<GeoPoint> gpspoints) {
+        protected void onPostExecute(ArrayList<CyclePoint> gpspoints) {
             if (gpspoints.size()<=0)
                 return;
             ArrayList<LatLng> points = new ArrayList<>();
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
             for (int i = 0; i < gpspoints.size(); i++) {
-                GeoPoint point = gpspoints.get(i);
-                double lat = point.getLatitudeE6() / 1E6;
-                double lng = point.getLongitudeE6() / 1E6;
+                CyclePoint point = gpspoints.get(i);
+                double lat = point.geoPoint.latitude;
+                double lng = point.geoPoint.longitude;
                 LatLng position = new LatLng(lat, lng);
                 points.add(position);
                 builder.include(position);
@@ -142,8 +134,8 @@ public class ShowMap extends AppCompatActivity {
             mapView.moveCamera(cu);
             mapView.animateCamera(cu);
 
-            LatLng startPoint=new LatLng(gpspoints.get(0).getLatitudeE6()/1E6,gpspoints.get(0).getLongitudeE6()/1E6);
-            LatLng endPoint=new LatLng(gpspoints.get(gpspoints.size()-1).getLatitudeE6()/1E6,gpspoints.get(gpspoints.size()-1).getLongitudeE6()/1E6);
+            LatLng startPoint=new LatLng(gpspoints.get(0).geoPoint.latitude,gpspoints.get(0).geoPoint.longitude);
+            LatLng endPoint=new LatLng(gpspoints.get(gpspoints.size()-1).geoPoint.latitude,gpspoints.get(gpspoints.size()-1).geoPoint.longitude);
             mapView.addMarker(new MarkerOptions()
                     .position(startPoint))
                     .setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
